@@ -1,5 +1,4 @@
 import crawlbase    # base crawl
-import re
 import scrapy
 
 
@@ -10,26 +9,28 @@ class WPVulndbSpider(crawlbase.BaseSpider):
 
     parsed = {}
 
+
     def parse(self, response):
         self.parse_page(response)
-        url = 'http://kassikas.com/index.jsp' # 'https://wpvulndb.com/wordpresses?page=2'
-        yield scrapy.Request(response.urljoin(url), self.parse)
-        #for rrow in response.css(' table tbody tr'):
+
+        for url in response.css('.pagination a::attr("href")').re('.*page=.*'):
+            print self.baseurl + url
+            yield scrapy.Request(response.urljoin(self.baseurl + url), self.parse_page)
 
 
     def parse_page(self, response):
         for rrow in response.css('#content table tbody tr'):
-            print rrow
+            #print rrow
 
             version =  rrow.css('a::text').extract_first()
             exp =  rrow.css('a[href*=vulnerabilities]')
 
-            print version
-            print exp
+            #print version
+            #print exp
 
             url = exp.css('::attr("href")').extract_first()
 
-            print url
+            #print url
 
             provider_id = url.strip('/').split('/')[-1]
 
@@ -37,21 +38,21 @@ class WPVulndbSpider(crawlbase.BaseSpider):
                 print "error getting provider_id from url"
                 print url
                 exit(1)
-            print provider_id
+            #print provider_id
 
             url = self.baseurl + url
 
-            print url
+            #print url
 
             if self.used(provider_id):
                 print "used[" + provider_id + "]"
                 continue
 
             title = exp.css('::text').extract_first()
-            print title
+            #print title
             tp = title.split(' - ')
 
-            print tp
+            #print tp
 
             tp.pop(0)
             title = " ".join(tp).strip();
@@ -62,7 +63,7 @@ class WPVulndbSpider(crawlbase.BaseSpider):
             print title
             print version
 
-            self.insert(provider_id=provider_id, link=url, module=c, exploit=title, version=version)
+            self.insert(provider_id=provider_id, link=url, module=title, exploit=title, version=version)
 
 
             # /vulnerabilities/8488

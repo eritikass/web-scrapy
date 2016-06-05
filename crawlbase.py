@@ -2,6 +2,7 @@ import mysql.connector
 from mysql.connector import errorcode
 import scrapy
 import config
+import re
 
 try:
     db = mysql.connector.connect(user=config.mysql_username, database=config.mysql_database, password=config.mysql_password, host=config.mysql_hostname)
@@ -29,8 +30,8 @@ class BaseSpider(scrapy.Spider):
         cursor = db.cursor()
         cursor.execute(query, (self.name, provider_id))
         for (res) in cursor:
-            print "x:" + provider_id + ":" + self.name + ">" # + res[0]
-            print res[0]
+            #print "x:" + provider_id + ":" + self.name # + ">" + res[0]
+            #print res[0]
             return res[0] > 0
 
         print "db error select value(" + self.name + ", " + provider_id + ")"
@@ -54,3 +55,9 @@ class BaseSpider(scrapy.Spider):
 
         db.commit()
         cursor.close()
+
+    def is_wp(self, string):
+        return re.search(r'\bwordpress\b', string, flags=re.IGNORECASE)
+
+    def cleanup_str(self, string):
+        return string.replace('WordPress', '').replace('<', ' <').replace('  ', ' ').strip()
