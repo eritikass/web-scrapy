@@ -56,6 +56,16 @@ class BaseSpider(scrapy.Spider):
         db.commit()
         cursor.close()
 
+    def get_provider_id(self, url):
+        provider_id = url.strip('/').replace('.pdf', '').split('/')[-1]
+
+        if not provider_id.isnumeric():
+            print "error getting provider_id from url"
+            print url
+            exit(1)
+
+        return provider_id
+
     def is_wp(self, string):
         return re.search(r'\bwordpress\b', string, flags=re.IGNORECASE)
 

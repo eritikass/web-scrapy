@@ -32,12 +32,7 @@ class WPVulndbSpider(crawlbase.BaseSpider):
 
             #print url
 
-            provider_id = url.strip('/').split('/')[-1]
-
-            if not provider_id.isnumeric():
-                print "error getting provider_id from url"
-                print url
-                exit(1)
+            provider_id = self.get_provider_id(url)
             #print provider_id
 
             url = self.baseurl + url
@@ -45,7 +40,7 @@ class WPVulndbSpider(crawlbase.BaseSpider):
             #print url
 
             if self.used(provider_id):
-                print "used[" + provider_id + "]"
+                #print "used[" + provider_id + "]"
                 continue
 
             title = exp.css('::text').extract_first()
